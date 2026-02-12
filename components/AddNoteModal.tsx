@@ -4,6 +4,10 @@ import { useState } from "react";
 import { Note } from "@/utils/storage";
 import DrawingPad from "./DrawingPad";
 
+// 🔹 Import Firestore
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "@/utils/firebase";
+
 interface Props {
   onClose: () => void;
   onSave: (note: Omit<Note, "id">) => void;
@@ -14,16 +18,24 @@ export default function AddNoteModal({ onClose, onSave }: Props) {
   const [fontFamily, setFontFamily] = useState("serif");
   const [drawing, setDrawing] = useState<string | undefined>();
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!text.trim() && !drawing) return;
 
-    onSave({
+    const noteData = {
       text: text.trim(),
       fontFamily,
       bgColor: "#581616",
       textColor: "#782727",
-      drawing
-    });
+      drawing,
+      position: { x: Math.random() * 600, y: Math.random() * 350 },
+      createdAt: new Date(),
+    };
+
+    // 🔹 Save to Firebase Firestore
+    await addDoc(collection(db, "notes"), noteData);
+
+    // 🔹 Call the original onSave to keep local updates if needed
+    onSave(noteData);
 
     onClose();
   };
