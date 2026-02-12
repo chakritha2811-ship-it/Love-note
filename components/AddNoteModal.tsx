@@ -18,28 +18,33 @@ export default function AddNoteModal({ onClose, onSave }: Props) {
   const [fontFamily, setFontFamily] = useState("serif");
   const [drawing, setDrawing] = useState<string | undefined>();
 
-  const handleSave = async () => {
-    // ✅ If no text or drawing, show default emoji
-    const noteText = text.trim() || "💌";
+  const handleSave = () => {
+    // ✅ Always allow save if either text or drawing exists
+    if (!text.trim() && !drawing) return;
+
+    // 🔹 If no drawing, assign a random emoji
+    const emojis = ["💌", "🌹", "💖", "💐", "💕", "🥰", "💘"];
+    const noteDrawing = drawing || emojis[Math.floor(Math.random() * emojis.length)];
 
     const noteData = {
-      text: noteText,
+      text: text.trim(),
       fontFamily,
       bgColor: "#581616",
       textColor: "#782727",
-      drawing: drawing || undefined,
+      drawing: noteDrawing,
       position: { x: Math.random() * 600, y: Math.random() * 350 },
       createdAt: new Date(),
     };
 
-    try {
-      // 🔹 Save directly to Firebase only (prevents duplicates)
-      await addDoc(collection(db, "notes"), noteData);
-    } catch (err) {
-      console.log("Firebase save error:", err);
-    }
+    // 🔹 Save locally first to keep your original board behavior
+    onSave(noteData);
 
-    // 🔹 Close modal
+    // 🔹 Save to Firestore publicly (anyone can read/write based on rules)
+    addDoc(collection(db, "notes"), noteData)
+      .then(() => console.log("Saved to Firestore!"))
+      .catch((err) => console.log("Firebase save error:", err));
+
+    // 🔹 Close modal immediately after saving
     onClose();
   };
 
