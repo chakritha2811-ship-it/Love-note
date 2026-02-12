@@ -66,8 +66,8 @@ export default function NoteIcon({
       onMouseUp={handleMouseUp}
       className="absolute cursor-pointer hover:scale-110 transition"
     >
-      {/* DRAWING OR ENVELOPE */}
-      {note.drawing ? (
+      {/* DRAWING OR EMOJI */}
+      {note.drawing && note.drawing.startsWith("data:image") ? (
         <img
           src={note.drawing}
           alt="drawing"
@@ -81,7 +81,7 @@ export default function NoteIcon({
               "0 0 10px rgba(137, 20, 20, 0.8), 0 0 25px rgba(121, 25, 25, 0.6)"
           }}
         >
-          💌
+          {note.drawing || "💌"}
         </div>
       )}
 
