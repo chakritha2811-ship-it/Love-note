@@ -18,7 +18,8 @@ export default function AddNoteModal({ onClose, onSave }: Props) {
   const [fontFamily, setFontFamily] = useState("serif");
   const [drawing, setDrawing] = useState<string | undefined>();
 
-  const handleSave = async () => {
+  const handleSave = () => {
+    // ✅ Always allow save if either text or drawing exists
     if (!text.trim() && !drawing) return;
 
     const noteData = {
@@ -31,12 +32,15 @@ export default function AddNoteModal({ onClose, onSave }: Props) {
       createdAt: new Date(),
     };
 
-    // 🔹 Save to Firebase Firestore
-    await addDoc(collection(db, "notes"), noteData);
-
-    // 🔹 Call the original onSave to keep local updates if needed
+    // 🔹 Save locally first to keep your original board behavior
     onSave(noteData);
 
+    // 🔹 Save to Firebase in the background, errors won’t block UI
+    addDoc(collection(db, "notes"), noteData).catch((err) =>
+      console.log("Firebase save error:", err)
+    );
+
+    // 🔹 Close modal
     onClose();
   };
 

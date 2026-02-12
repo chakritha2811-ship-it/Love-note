@@ -1,4 +1,3 @@
-// page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,7 +7,7 @@ import { Note } from "@/utils/storage";
 
 // 🔹 Import Firestore
 import { collection, addDoc, onSnapshot, deleteDoc, doc } from "firebase/firestore";
-import { db } from "@/utils/firebase"; // <-- your firebase.ts file
+import { db } from "@/utils/firebase"; // your firebase.ts file
 
 type Screen = "start" | "choose" | "board";
 
@@ -33,7 +32,7 @@ export default function Page() {
   }, []);
 
   // ===========================
-  // 🔹 Add note to Firebase
+  // 🔹 Add note to Firebase (and keep your original board behavior)
   // ===========================
   const addNote = async (noteData: Omit<Note, "id">) => {
     await addDoc(collection(db, "notes"), {
@@ -51,7 +50,7 @@ export default function Page() {
   };
 
   const updatePosition = (id: string, x: number, y: number): void => {
-    // Keep positions local for now
+    // Keep positions local for dragging only
     setNotes((prev) =>
       prev.map((note) => (note.id === id ? { ...note, position: { x, y } } : note))
     );
@@ -97,7 +96,9 @@ export default function Page() {
     );
   }
 
+  // ===========================
   // SCREEN 2 — FOR HIM / HER
+  // ===========================
   if (screen === "choose") {
     return (
       <div className="h-screen flex flex-col items-center justify-center text-center">
@@ -132,7 +133,9 @@ export default function Page() {
     );
   }
 
+  // ===========================
   // SCREEN 3 — LOVE BOARD
+  // ===========================
   return (
     <div className="min-h-screen relative p-8 flex flex-col items-center justify-center pt-0">
       <h1 className="text-5xl text-white font-mono mb-12 glow-text">
