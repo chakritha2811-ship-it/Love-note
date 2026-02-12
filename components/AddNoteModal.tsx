@@ -18,27 +18,26 @@ export default function AddNoteModal({ onClose, onSave }: Props) {
   const [fontFamily, setFontFamily] = useState("serif");
   const [drawing, setDrawing] = useState<string | undefined>();
 
-  const handleSave = () => {
-    // ✅ Always allow save if either text or drawing exists
-    if (!text.trim() && !drawing) return;
+  const handleSave = async () => {
+    // ✅ If no text or drawing, show default emoji
+    const noteText = text.trim() || "💌";
 
     const noteData = {
-      text: text.trim(),
+      text: noteText,
       fontFamily,
       bgColor: "#581616",
       textColor: "#782727",
-      drawing,
+      drawing: drawing || undefined,
       position: { x: Math.random() * 600, y: Math.random() * 350 },
       createdAt: new Date(),
     };
 
-    // 🔹 Save locally first to keep your original board behavior
-    onSave(noteData);
-
-    // 🔹 Save to Firebase in the background, errors won’t block UI
-    addDoc(collection(db, "notes"), noteData).catch((err) =>
-      console.log("Firebase save error:", err)
-    );
+    try {
+      // 🔹 Save directly to Firebase only (prevents duplicates)
+      await addDoc(collection(db, "notes"), noteData);
+    } catch (err) {
+      console.log("Firebase save error:", err);
+    }
 
     // 🔹 Close modal
     onClose();
