@@ -10,10 +10,10 @@ import { db } from "@/utils/firebase";
 
 interface Props {
   onClose: () => void;
-  onSave: (note: Omit<Note, "id">) => void;
+  onSave?: (note: Omit<Note, "id">) => void; // optional now
 }
 
-export default function AddNoteModal({ onClose, onSave }: Props) {
+export default function AddNoteModal({ onClose }: Props) {
   const [text, setText] = useState("");
   const [fontFamily, setFontFamily] = useState("serif");
   const [drawing, setDrawing] = useState<string | undefined>();
@@ -37,10 +37,7 @@ export default function AddNoteModal({ onClose, onSave }: Props) {
       createdAt: new Date(),
     };
 
-    // 🔹 Save locally only once
-    onSave(noteData);
-
-    // 🔹 Save to Firestore
+    // 🔹 Save to Firestore only (prevents double rendering)
     try {
       await addDoc(collection(db, "notes"), noteData);
       console.log("Saved to Firestore!");
@@ -48,7 +45,7 @@ export default function AddNoteModal({ onClose, onSave }: Props) {
       console.log("Firebase save error:", err);
     }
 
-    // 🔹 Close modal
+    // 🔹 Close modal immediately after saving
     onClose();
   };
 
